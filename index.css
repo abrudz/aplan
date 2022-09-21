@@ -1,9 +1,12 @@
 @font-face{font-family:A;src:local('APL385 Unicode'),url('apl385.ttf')}
 @media(prefers-color-scheme:dark){html{filter:invert(1)hue-rotate(180deg)}}
-body{background:#ccc;text-align:center;overflow:hidden;margin:0}
-h1{height:1em;margin:1ex 0}
+body{background:#ccc;overflow:hidden;margin:0}
+h1{height:1em;margin:1ex 0;text-align:center}
 a{color:currentcolor}
 a:first-child{float:left;margin:0 1em;text-decoration:none}
 a:last-child{float:right;margin:.5ex 1em}
 img{height:1.618ex}
-textarea{font-family:A;width:calc(50% - 2em);height:calc(100% - 14ex);resize:none;margin:0 0.5em;font-size:1em}
+p{margin:0.5ex 2em}
+span{float:right}
+div{margin:0 1em}
+textarea{font-family:A;width:calc(50% - 1.5em);height:calc(100% - 14ex);resize:none;margin:0 0.5em;font-size:1em}

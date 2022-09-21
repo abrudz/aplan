@@ -10,13 +10,13 @@ run = async (id) => {
         language: "dyalog_apl",
         code:
    `⎕FIX'file://',(2⎕NQ#'GetEnvironment' 'DYALOG'),'/StartupSession/Dyalog/Array.apln'
-    'display'⎕CY'dfns'
+    'display' 'box'⎕CY'dfns'
      Show←{
          2=⎕NC'⍵':#.display ⍵
          0::'[namespace]'
-         r←⍵.((⊂,⊂∘∇∘⍎)¨⎕NL-2 9)
-         r,←⍵.((⊂,⊂∘⎕CR)¨⎕NL-3 4)
-         ↑r[⍋r]
+         r←⍵.((⊂,'←',⊂∘∇∘⍎)¨⎕NL-2 9)
+         r,←⍵.((⊂,'←',⊂∘⎕CR)¨⎕NL-3 4)
+         #.box⎕FMT↑r[⍋r]
      }
      ⎕TRAP←0 'E' '⎕←1⎕JSON,⊂⎕DMX.EM'
      ⎕←1⎕JSON↓⎕FMT Show Array.Deserialise 0⎕JSON'${json}'`,
@@ -42,4 +42,4 @@ Copy = () => {
 }
 
 if (params.get("a") != null) { input.value = decodeURIComponent(params.get("a")); }
-run('input')
+
