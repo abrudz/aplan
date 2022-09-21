@@ -14,7 +14,7 @@ run = async (id) => {
    `⎕FIX'file://',(2⎕NQ#'GetEnvironment' 'DYALOG'),'/StartupSession/Dyalog/Array.apln'
     'display'⎕CY'dfns'
      Show←{
-         2=⎕NC'⍵':display ⍵
+         2=⎕NC'⍵':#.display ⍵
          0::'[namespace]'
          r←⍵.((⊂,⊂∘∇∘⍎)¨⎕NL-2 9)
          r,←⍵.((⊂,⊂∘⎕CR)¨⎕NL-3 4)
