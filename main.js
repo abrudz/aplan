@@ -20,6 +20,7 @@ run = async (id) => {
          r,←⍵.((⊂,⊂∘⎕CR)¨⎕NL-3 4)
          ↑r[⍋r]
      }
+     ⎕TRAP←0 'E' '⎕←1⎕JSON⎕DMX.EM'
      ⎕←1⎕JSON↓⎕FMT Show Array.Deserialise 0⎕JSON'${JSON.stringify(input.value).replace(/\'/g, "''")}'`,
         timeout: 1,
       })
