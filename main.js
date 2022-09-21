@@ -25,15 +25,15 @@ run = async (id) => {
     );
   };
   
-    socket.onmessage = async (event) => {
-      try { 
-       const stream = await MessagePack.decodeAsync(event.data.stream())
-       output.value = JSON.parse(new TextDecoder().decode(stream.stdout)).join("\n");
-      } catch {
-       output.value = 'Internal Server Error';
-     }
-    };
-  }
+  socket.onmessage = async (event) => {
+    try { 
+     const stream = await MessagePack.decodeAsync(event.data.stream())
+     output.value = JSON.parse(new TextDecoder().decode(stream.stdout)).join("\n");
+    } catch {
+     output.value = 'Internal Server Error';
+   }
+  };
+}
   
 Copy = () => {
   w.history.replaceState({},w.document.title,w.location.pathname + "?a=" + encodeURIComponent(input.value) );
