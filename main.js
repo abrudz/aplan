@@ -1,12 +1,10 @@
 w = window; params = new URLSearchParams(w.location.search);
 
 run = async (id) => {
-    const i = document.getElementById(id);
-  
+    
     let socket = new WebSocket("wss://dyalog.run/api/v0/ws/execute");
-  
     socket.onopen = () => {
-     if (i.value == ""){ expr = i.getAttribute("placeholder"); } else { expr = i.value }
+     json=JSON.stringify(input.value?input.value:input.getAttribute("placeholder")).replace(/\'/g, "''")
      socket.send(
       MessagePack.encode({
         language: "dyalog_apl",
@@ -20,8 +18,8 @@ run = async (id) => {
          r,←⍵.((⊂,⊂∘⎕CR)¨⎕NL-3 4)
          ↑r[⍋r]
      }
-     ⎕TRAP←0 'E' '⎕←1⎕JSON⎕DMX.EM'
-     ⎕←1⎕JSON↓⎕FMT Show Array.Deserialise 0⎕JSON'${JSON.stringify(input.value).replace(/\'/g, "''")}'`,
+     ⎕TRAP←0 'E' '⎕←1⎕JSON,⊂⎕DMX.EM'
+     ⎕←1⎕JSON↓⎕FMT Show Array.Deserialise 0⎕JSON'${json}'`,
         timeout: 1,
       })
     );
