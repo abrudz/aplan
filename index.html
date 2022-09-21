@@ -1,74 +1,17 @@
 <html>
   <head>
-    <title>Tacit Help - Transform tacit APL into dfn form</title>
+    <title>Evaluate APL Array Notation</title>
     <meta charset="utf-8" />
     <script src="msgpack.min.js"></script>
     <link rel="stylesheet" href="/index.css">
     <link rel="icon" href="favicon.svg" sizes="any" type="image/svg+xml">
   </head>
   <body>
-    <h1>Transform tacit APL into dfn form</h1>
-
-    <main class="split">
-      <section id="V1" class="pane">
-        <div class="container">
-          <label for="f">
-            <pre>f ←</pre>
-          </label>
-          <input id="f" autofocus autocomplete="off" spellcheck="false" oninput="run('f')" placeholder="+⌿÷⊣∘≢" />
-        </div>
-        <div class="container">
-          <label for="fY">
-            <pre>f Y</pre> ⇔
-          </label>
-          <pre class="output" id="fY"> </pre>
-        </div>
-        <div class="container">
-          <label for="XfY">
-            <pre>X f Y</pre> ⇔
-          </label>
-          <pre class="output" id="XfY"> </pre>
-        </div>
-      </section>
-
-      <div style="display: flex; flex-direction: column">
-        <div id="expand" title="Toggle second pane" onclick="Split(this)" class="circle">+</div>
-        <a title="copy query URL" onclick="Copy()" href="#" class="circle">#</a>
-        <div id="swap" title="Swap f and g" onclick="Swap()" class="circle">⇄</div>
-      </div>
-
-
-      <section id="V2" class="pane">
-        <div class="container">
-          <label for="g">
-            <pre>g ←</pre>
-          </label>
-          <input id="g" autofocus autocomplete="off" spellcheck="false" oninput="run('g')" placeholder="g⍨∘f⍨" />
-        </div>
-        <div class="container">
-          <label for="gY">
-            <pre>g Y</pre> ⇔
-          </label>
-          <pre class="output" id="gY"> </pre>
-        </div>
-        <div class="container">
-          <label for="gY">
-            <pre>X g Y</pre> ⇔
-          </label>
-          <pre class="output" id="XgY"> </pre>
-        </div>
-      </section>
-      
-  </main>
-    <small style="font-family: sans-serif;">Arrays: <code>A</code>, <code>B</code>, <code>C</code>,… &emsp; Functions: <code>a</code>, <code>b</code>, <code>c</code>,…</small>
-
-    <footer style="z-index: 1">
-      Please <a onclick="Copy()"
-        href=https://github.com/awagga/tacit.help/issues/new>report</a>
-     errors or incorrect results to improve the quality of this system
-    </footer>
+    <h1>Evaluate APL <a href=https://apl.wiki/array_notation target=_blank>Array Notation</a></h1>
+    <textarea id=input autocomplete="off" spellcheck="false" oninput="run('input')" placeholder="[1 2 3
+4 5 6]">
+    <textarea id=output readonly>
+    <a title="copy query URL" onclick="Copy()" href="#" class="circle">#</a>
   </body>
-
-  <script src="explicit.js"></script> 
   <script src="main.js"></script>
 </html>
