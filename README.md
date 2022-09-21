@@ -1,11 +1,13 @@
-## Tests
-```apl
-read ← ⊃∘⎕NGET 1,⍨⊂
-failed ← ⍸0⍷{0::⍬ ⋄ 'o' ≡∘explicit∘⊃⍥(read '.dyalog',⍨'tests/aplcart/t',(⍕⍵),⊢) 'i'}¨⍳160
-```
+# APL Array Notation playground
 
-## Build
-```apl
-source ← '2 ⎕FIX''file://'∘{0::⍵ ⋄ n ← ≢⍺ ⋄ read ⍵/⍨0@(≢⍵)∨\(-n)↓(n⍴0),⍺⍷⍵}¨ read 'explicit.aplf'
-'explicit.js' 1 ⎕nput⍨ 'const explicit =',(⎕json ⊃,/⊆¨ source),'.join(''\n'')'
-```
+## Online
+
+Go to [abrudz.github.io/aplan](https://abrudz.github.io/aplan).
+
+## Offline
+
+* Download Run.aplf
+
+* If you have Dyalog 18.2 for Windows, right-click on the file and choose **Run with Dyalog**
+
+* With any other system, enter `⍎⊃2⎕FIX'file://path/to/Run.aplf'` into your APL session.
