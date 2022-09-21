@@ -1,5 +1,5 @@
-@font-face{font-family:A;src:local('APL385 Unicode'),url('APL385 Unicode')}
+@font-face{font-family:A;src:local('APL385 Unicode'),url('apl385.ttf')}
 @media(prefers-color-scheme:dark){html{filter:invert(1)hue-rotate(180deg)}}
-h1{height:1em}
-textarea{font-family:A;width:calc(50% - 1ex);height:calc(100% - 6em);resize:none}
-body{background:#ccc;text-align:center;overflow:hidden}
+h1{height:1em;margin:1ex 0}
+textarea{font-family:A;width:calc(50% - 2em);height:calc(100% - 14ex);resize:none;margin:0 0.5em}
+body{background:#ccc;text-align:center;overflow:hidden;margin:0}
