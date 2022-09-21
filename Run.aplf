@@ -13,7 +13,7 @@
          0::'[namespace]'
          r←⍵.((⊂,⊂∘∇∘⍎)¨⎕NL-2 9)
          r,←⍵.((⊂,⊂∘⎕CR)¨⎕NL-3 4)
-         ↑r[⍋r]
+         0 ⎕SE.Dyalog.Utils.disp⊂⎕FMT↑r[⍋r]
      }
 
      in←0⍴⊂''
