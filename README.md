@@ -2,7 +2,7 @@
 
 ## Online
 
-Go to [abrudz.github.io/aplan](https://abrudz.github.io/aplan).
+* Go to [abrudz.github.io/aplan](https://abrudz.github.io/aplan).
 
 ## Offline
 
