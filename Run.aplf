@@ -1,0 +1,34 @@
+ Run;in;b;Show;Exec;val
+ :Trap 0
+     :If 9=⎕NC'⎕SE.Dyalog.Array'
+         Exec←⎕SE.Dyalog.Array.Deserialise
+     :ElseIf 3=⎕NC'⎕SE.Link.Deserialise'
+         Exec←⎕SE.Link.Deserialise
+     :Else
+         'Needs v17.1'⎕SIGNAL 16
+     :EndIf
+
+     Show←{
+         2=⎕NC'⍵':⎕SE.Dyalog.Utils.display ⍵
+         0::'[namespace]'
+         r←⍵.((⊂,⊂∘∇∘⍎)¨⎕NL-2 9)
+         r,←⍵.((⊂,⊂∘⎕CR)¨⎕NL-3 4)
+         ↑r[⍋r]
+     }
+
+     in←0⍴⊂''
+     b←0
+     :Repeat
+         ⍞←6↑''
+         →0/⍨'→ '(∩⍨≡⊢)'''[^'']+''|⍝.*'⎕R''⊃in,←⊂⍞
+         b←+/-⌿'()[]'∘.=∊in
+         ⍞←b↑''
+         :If 0=b
+             val←Exec in
+             ⎕←Show val
+             in←0⍴⊂''
+         :EndIf
+     :EndRepeat
+ :Else
+     ⎕SIGNAL⊂⎕DMX.(('EN'EN)('EM'EM)('Message'(OSError{⍵,2⌽(×≢⊃⍬⍴2⌽⍺,⊂'')/'") ("',⊃⍬⍴2⌽⍺}Message)))
+ :EndTrap
