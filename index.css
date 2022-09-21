@@ -1,40 +1,4 @@
-* { box-sizing: border-box; align-items: center; color: inherit; }
-
-@font-face { font-family: A; src: local('SAX2'), url(SAX2.ttf) }
-
-code,input,pre { white-space: pre; font-family: A; }
-
-code { font-size: 125% } 
-
-sub,body { background:#ddd; text-align: center; font-family: sans-serif }
-
-input,.output { flex: 1; padding: 8px; overflow-wrap: break-word; resize: none; text-align: left; margin: auto; }
-main,input { font-size: 21px; font-weight: 600; }
-
-.output,.circle { background: #eee; white-space: pre-wrap; }
-
-a{font-weight: bold;}
-
-@media (prefers-color-scheme: dark) {html{ filter: invert(1) hue-rotate(180deg); }}
-
-.circle { aspect-ratio : 1/1; cursor: pointer; font-size: 21px; user-select: none; border-radius: 50%; font-family: A; margin-bottom: .5em;
- border: .25ex solid currentcolor; text-decoration: none; line-height: 1em; display: inline-block; text-align: center; padding: .2em}
-
-footer{ color: #666; position : absolute; bottom : 0; padding: 1.618ex;}
-
-.pane { flex-grow: 1; display: flex; flex-direction: column; }
-
-section, .container, .split{ display: flex; justify-content: center; flex-direction: row; }
-
-section, .container { width: 100%; margin: 0; padding: 0; align-items: center; }
-
-section { flex-direction: column; max-width: 35em; }
-
-.container { margin: .618em;}
-.container label { min-width: 5em; overflow: auto; text-align: right; padding-right: 0.618ex; }
-.container pre { display: inline-block; }
-
-#V2,#swap { display: none; }
-
-#V1,#V2{ padding-left: 1em; padding-right: 1em;  margin: .618em;}
-p { all: unset; font-family: A; }
+@font-face{font-family:A;src:local('APL385 Unicode'),url('APL385 Unicode')}
+textarea{font-family:A}
+body{background:#ddd;text-align:center}
+@media(prefers-color-scheme:dark){html{filter:invert(1) hue-rotate(180deg)}}
