@@ -1,4 +1,4 @@
-# APL Array Notation playground
+# APL Array Notation sandbox
 
 ## Online
 
