@@ -1,4 +1,5 @@
 @font-face{font-family:A;src:local('APL385 Unicode'),url('APL385 Unicode')}
-textarea{font-family:A}
-body{background:#ddd;text-align:center}
-@media(prefers-color-scheme:dark){html{filter:invert(1) hue-rotate(180deg)}}
+@media(prefers-color-scheme:dark){html{filter:invert(1)hue-rotate(180deg)}}
+h1{height:1em}
+textarea{font-family:A;width:calc(50% - 1ex);height:calc(100% - 6em);resize:none}
+body{background:#ccc;text-align:center;overflow:hidden}
