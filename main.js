@@ -14,8 +14,8 @@ run = async (id) => {
      Show←{
          2=⎕NC'⍵':#.display ⍵
          0::'[namespace]'
-         r←⍵.((⊂,'←',⊂∘∇∘⍎)¨⎕NL-2 9)
-         r,←⍵.((⊂,'←',⊂∘⎕CR)¨⎕NL-3 4)
+         r←⍵.((⊂,⊂∘∇∘⍎)¨⎕NL-2 9)
+         r,←⍵.((⊂,⊂∘⎕CR)¨⎕NL-3 4)
          #.box⎕FMT↑r[⍋r]
      }
      ⎕TRAP←0 'E' '⎕←1⎕JSON,⊂⎕DMX.EM'
@@ -43,3 +43,5 @@ Copy = () => {
 
 if (params.get("a") != null) { input.value = decodeURIComponent(params.get("a")); }
 
+input.value=eg.value=eg.options[Math.ceil((eg.options.length-1)*Math.random())].value
+run('input')
