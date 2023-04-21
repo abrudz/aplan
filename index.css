@@ -3,8 +3,8 @@
 body{background:#ccc;overflow:hidden;margin:0}
 h1{height:1em;margin:1ex 0;text-align:center}
 a{color:currentcolor}
-a:first-child{float:left;margin:0 1em;text-decoration:none}
-a:last-child{float:right;margin:.5ex 1em}
+h1>a:first-child{float:left;margin:0 1em;text-decoration:none}
+h1>a:last-child{float:right;margin:.5ex 1em}
 img{height:1.618ex}
 p{margin:0.5ex 2em}
 span{float:right}
