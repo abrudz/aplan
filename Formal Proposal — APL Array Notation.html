@@ -1,0 +1,482 @@
+<!doctype html>
+<html>
+<head>
+<meta charset='UTF-8'><meta name='viewport' content='width=device-width initial-scale=1'>
+<title>Formal Proposal — APL Array Notation</title>
+<style>
+body{line-height:1.15;font-family:DejaVu Serif;hyphens:auto}
+table{border-spacing:1ex}
+th{text-align:left}
+td>*{vertical-align:middle}
+code,pre{white-space:pre;background:#eee;margin:0;padding:0 .33ex;border-radius:.33ex;display:inline-block;font-family:DejaVu Sans Mono}
+img{max-width:100%}
+.i{font-family:Iosevka SS09}
+span{white-space:nowrap}
+
+@media print{
+  h1,h2,h3{break-after:avoid}
+  table{break-inside:avoid}
+  .b{ page-break-before:always}
+  sup>a{text-decoration:none;color:inherit}
+  img{max-height:95vh}
+}
+</style>
+</head>
+<body lang="en"><h1 id='formal-proposal-apl-array-notation'>Formal Proposal:<br>APL Array Notation</h1>
+<p>One of the defining features of the APL language is the ability to denote numeric vectors directly through juxtaposition — separating the elements by spaces, as in <code>0 1 1 2 3 5 8</code>. The notation for character “vectors” is similar to that for “strings” in most other languages, using quotes to denote the start and end of a list of characters. When generalised arrays were added to the language in the early 1980s, the most popular APL dialects extended the vector notation to allow nested arrays to be written using so-called <em>strand notation</em>, allowing the juxtaposition of sub-expressions producing arrays to form a one-dimensional array — as in <code>(2+2) (FOO 42) MAT</code></p>
+<p>Strand notation works well for small, relatively simple one-dimensional arrays. As soon as arrays are too large to be represented on a single line of code, deeply nested, rank greater than one, or (in APL systems that support them) contain namespaces or objects, APL requires the use of primitives or system functions to assemble them from simple components. </p>
+<p>The flexibility of the APL language has allowed many APL programmers to work around the issue, either by implementing custom array notations or by using the ability of most APL interpreters to simply store arrays within saved workspaces without having an actual source form of the data. Within specific applications, domain specific notations can be very successful, but readability is poor for anyone not trained in the specific variation used — or who is missing the tooling required to interpret them — as well as sometimes having significant run-time cost.</p>
+<p>Recently, the need for a better notation for arrays has grown within the Dyalog APL community:</p>
+<ul>
+<li>The switch to text-based sources means that arrays that represent constants, enumerations or initial values — that arguably constitute part of the source of an application — need a textual representation if they are to be managed using the same tools as functions and operators.</li>
+<li>The increased use of namespaces and name/value pairs as arguments to both user-defined and system functions makes the lack of a good notation for namespaces painful.</li>
+</ul>
+<p>Dyalog Ltd intends to implement core language support for a notation that makes it possible to write most arrays literally, without requiring the use of primitive functions, over multiple lines of source where this increases readability. It can be used to write nested arrays, and arrays of rank greater than one. The notation also describes many namespaces/objects, providing both inline and anonymous definitions.</p>
+<p>Array notations similar to that proposed here are currently supported in some newer implementations such as dzaima/APL and the APL-derivative BQN. Experimental implementations using APL models are available within some tools in the Dyalog eco-system, such as the Link tool which supports the representation of code and data in Unicode text files and the functions <code>Serialise</code> and <code>Deserialise</code> within the namespace <code>⎕SE.Dyalog.Array</code>. You can also try it out in <a href="https://abrudz.github.io/aplan/">the interactive online sandbox</a>.</p>
+<h2 id='providing-feedback'>Providing feedback</h2>
+<p>Dyalog is keen to have feedback from the array language community on the notation proposed here so that we can feel confident about the design, before we proceed with our implementation. Our hope is that we will be able to keep the differences between future array notations within the family of array languages to a minimum.</p>
+<p>We will monitor the APL Orchard chatroom, the APL Farm's #apl channel, the r/apl and r/apljk subreddits, and the comp.lang.apl newsgroup for feedback. (See <a href="https://aplwiki.com/wiki/Chat_rooms_and_forums">APL Wiki</a> for information about these forums.) In addition, we have created <a href="https://forums.dyalog.com/viewtopic.php?f=13&t=1871">a topic in our own forum</a>. If you prefer not to comment in public, please send comments <a href="mailto:arraynotation@dyalog.com">by e-mail</a>. Dyalog will update <a href="https://aplwiki.com/wiki/Talk:Array_notation_design_considerations">the discussion page</a> for APL Wiki's Array notation design considerations article to contain a record of significant feedback.</p>
+<h2 id="overview">Overview</h2>
+<p>The fundamental mechanism underlying the proposed notation is to group multiple lines, or statements separated by the traditional APL statement separator (diamond <code>⋄</code>), within parentheses and square brackets. Statements within parentheses <code>()</code> represent vectors — roughly equivalent to stranding — while statements within square brackets <code>[]</code> represent higher rank arrays, where the vector is subjected to a <a href="https://apl.wiki/Mix">Mix</a>. The notation also supports namespaces or dictionaries, where zero or more statements in the form <code>name:value</code> are collected within parentheses <code>()</code>.</p>
+<h2 id='examples'>Examples</h2>
+<p>A very common technique used for array construction in APL is repeated concatenation resulting in the desired value being held in a variable (<code>z</code> in the below examples). Array notation should make it possible to express the complete array directly. In addition, the traditional technique sometimes involves the creation of helper variables as a side effect.</p>
+<p>Note that for all Dyalog APL examples, monadic <code>⊃</code> is <a href="https://apl.wiki/Mix">Mix</a> (that is, using <code>⎕ML←3</code>) for readability outside the Dyalog community.</p>
+<p>In the examples below, the traditional method of creating an array is marked Ⓣ, the proposed APL array notation is marked Ⓐ, and the minimal-style boxed display output (as provided by <code>]disp</code> and <a href="https://dfns.dyalog.com/n_disp.htm"><code>disp</code> from the dfns workspace</a>) is marked Ⓑ.</p>
+<h3 id='basic-arrays'>Basic arrays</h3>
+<figure><table>
+<thead>
+<tr><th colspan="2">Vector of numeric vectors on a single line</th></tr></thead>
+<tbody><tr><td><pre>(0 6 1 8) (1 4 1 4 2) (2 7 1 8 2 8) (3 1 4 1 5)</pre></td><td>Ⓣ</td></tr><tr><td><pre>(0 6 1 8 ⋄ 1 4 1 4 2 ⋄ 2 7 1 8 2 8 ⋄ 3 1 4 1 5)</pre></td><td>Ⓐ</td></tr>
+<tr><td><pre>┌───────┬─────────┬───────────┬─────────┐
+│0 6 1 8│1 4 1 4 2│2 7 1 8 2 8│3 1 4 1 5│
+└───────┴─────────┴───────────┴─────────┘
+</pre></td><td>Ⓑ</td></tr></tbody>
+</table></figure>
+<figure><table>
+<thead>
+<tr><th colspan="2">Vector of numeric vectors split over two lines</th></tr></thead>
+<tbody><tr><td><pre>z← (0 6 1 8) (1 4 1 4 2)
+z,←(2 7 1 8 2 8) (3 1 4 1 5)</pre></td><td>Ⓣ</td></tr><tr><td><pre>(0 6 1 8 ⋄ 1 4 1 4 2
+ 2 7 1 8 2 8 ⋄ 3 1 4 1 5)</pre></td><td>Ⓐ</td></tr>
+<tr><td><pre>┌───────┬─────────┬───────────┬─────────┐
+│0 6 1 8│1 4 1 4 2│2 7 1 8 2 8│3 1 4 1 5│
+└───────┴─────────┴───────────┴─────────┘
+</pre></td><td>Ⓑ</td></tr></tbody>
+</table></figure>
+<figure><table>
+<thead>
+<tr><th colspan="2">Vector of character vectors, one on each line</th></tr></thead>
+<tbody><tr><td><pre>z← ⊂&#39;Three&#39;
+z,←⊂&#39;Blind&#39;
+z,←⊂&#39;Mice&#39;</pre></td><td>Ⓣ</td></tr><tr><td><pre>(&#39;Three&#39;
+ &#39;Blind&#39;
+ &#39;Mice&#39;)</pre></td><td>Ⓐ</td></tr>
+<tr><td><pre>
+┌─────┬─────┬────┐
+│Three│Blind│Mice│
+└─────┴─────┴────┘
+</pre></td><td>Ⓑ</td></tr>
+</tbody>
+</table></figure>
+<figure><table>
+<thead>
+<tr><th colspan="2">Numeric matrix</th></tr></thead>
+<tbody><tr><td><pre>z←⍉⍪0 6 1 8
+z⍪← 1 4 1 4
+z⍪← 2 7 1 8
+z⍪← 3 1 4 2</pre></td><td>Ⓣ</td></tr><tr><td><pre>[0 6 1 8
+ 1 4 1 4
+ 2 7 1 8
+ 3 1 4 2]</pre></td><td>Ⓐ</td></tr>
+<tr><td><pre>
+0 6 1 8
+1 4 1 4
+2 7 1 8
+3 1 4 2
+</pre></td><td>Ⓑ</td></tr>
+</tbody>
+</table></figure>
+<figure><table>
+<thead>
+<tr><th colspan="2">Column matrix</th></tr></thead>
+<tbody><tr><td><pre>z←⍪⊂&#39;Three&#39;
+z⍪←⊂&#39;Blind&#39;
+z⍪←⊂&#39;Mice&#39;</pre></td><td>Ⓣ</td></tr><tr><td><pre>[⊂&#39;Three&#39;
+ ⊂&#39;Blind&#39;
+ ⊂&#39;Mice&#39;]</pre> or <pre>
+[(&#39;Three&#39;⋄)
+ (&#39;Blind&#39;⋄)
+ (&#39;Mice&#39; ⋄)]</pre></td><td>Ⓐ</td></tr><tr><td><pre>┌─────┐
+│Three│
+├─────┤
+│Blind│
+├─────┤
+│Mice │
+└─────┘</pre></td><td>Ⓑ</td></tr></tbody>
+</table></figure>
+<h3 id='more-complex-arrays' class="b">More complex arrays</h3>
+<figure><table>
+<thead>
+<tr><th colspan="2">Vector of matrices</th></tr></thead>
+<tbody><tr><td><pre>a←⍉⍪0 0 1
+a⍪← 1 0 1
+a⍪← 0 1 1
+z←,⊂a
+a←⍉⍪0 1 1
+a⍪← 1 1 0
+a⍪← 0 1 0
+z,←⊂a
+a←⍉⍪0 1 1 1
+a⍪← 1 1 1 0
+z,←⊂a
+a←⍉⍪0 1 1 0
+a⍪← 1 0 0 1
+a⍪← 0 1 1 0
+z,←⊂a</pre></td><td>Ⓣ</td></tr><tr><td><pre>([0 0 1
+  1 0 1
+  0 1 1]
+
+ [0 1 1
+  1 1 0
+  0 1 0]
+
+ [0 1 1 1
+  1 1 1 0]
+
+ [0 1 1 0
+  1 0 0 1
+  0 1 1 0])</pre>
+</td><td>Ⓐ</td></tr><tr><td><pre>┌─────┬─────┬───────┬───────┐
+│0 0 1│0 1 1│0 1 1 1│0 1 1 0│
+│1 0 1│1 1 0│1 1 1 0│1 0 0 1│
+│0 1 1│0 1 0│       │0 1 1 0│
+└─────┴─────┴───────┴───────┘
+</pre></td><td>Ⓑ</td></tr></tbody>
+</table></figure>
+<figure><table>
+<thead>
+<tr><th colspan="2">Table with numeric and text columns</th></tr></thead>
+<tbody><tr><td><pre>z←⍉⍪0 &#39;OK&#39;
+z⍪← 1 &#39;WS FULL&#39;
+z⍪← 2 &#39;SYNTAX ERROR&#39;
+z⍪← 3 &#39;INDEX ERROR&#39;
+z⍪← 4 &#39;RANK ERROR&#39;</pre></td><td>Ⓣ</td></tr><tr><td><pre>[0 &#39;OK&#39;
+ 1 &#39;WS FULL&#39;
+ 2 &#39;SYNTAX ERROR&#39;
+ 3 &#39;INDEX ERROR&#39;
+ 4 &#39;RANK ERROR&#39;]</pre></td><td>Ⓐ</td></tr><tr><td><pre>┌─┬────────────┐
+│0│OK          │
+├─┼────────────┤
+│1│WS FULL     │
+├─┼────────────┤
+│2│SYNTAX ERROR│
+├─┼────────────┤
+│3│INDEX ERROR │
+├─┼────────────┤
+│4│RANK ERROR  │
+└─┴────────────┘</pre></td><td>Ⓑ</td></tr></tbody>
+</table></figure>
+<figure><table>
+<thead>
+<tr><th colspan="2">Rank 3 numeric array</th></tr></thead>
+<tbody><tr><td><pre>a←⍉⍪3 1 4
+a⍪← 1 5 0
+
+b←⍉⍪2 7 0
+b⍪← 2 0 0
+z←a,[0.5]b</pre></td><td>Ⓣ</td></tr><tr><td><pre>[[3 1 4
+  1 5 0]
+
+ [2 7 0
+  2 0 0]]</pre>
+</td><td>Ⓐ</td></tr><tr><td><pre>3 1 4
+1 5 0
+
+2 7 0
+2 0 0</pre></td><td>Ⓑ</td></tr></tbody>
+</table></figure>
+<figure><table>
+<thead>
+<tr><th colspan="2">Rank 3 numeric array relying on automatic padding with fill element</th></tr></thead>
+<tbody><tr><td><pre>a←,⊂3 1 4
+a,←⊂1 5
+a←⊃a
+b←,⊂2 7
+b,← 2
+b←⊃b
+z←⊃a b</pre></td><td>Ⓣ</td></tr><tr><td><pre>[[3 1 4
+  1 5]
+
+ [2 7
+  2]]</pre>
+</td><td>Ⓐ</td></tr><tr><td><pre>3 1 4
+1 5 0
+
+2 7 0
+2 0 0</pre></td><td>Ⓑ</td></tr></tbody>
+</table></figure>
+<figure><table>
+<thead>
+<tr><th colspan="2">Matrix of simple and nested vectors, with dynamic values</th></tr></thead>
+<tbody><tr><td><pre>z←⍉⍪&#39;fns&#39;  ((0 1)(0.7 0)(0.7 0)×size)
+z⍪← &#39;fnd&#39;  ((0 1)(0   0)(0   0)×size)
+z⍪← &#39;lines&#39;((0 0)(0.7 0)(0.7 0)×size)
+z⍪← &#39;lnd&#39;  ((0 0)(0   0)(0   0)×size)</pre></td><td>Ⓣ</td></tr><tr><td><pre>[&#39;fns&#39;  ((0 1 ⋄ 0.7 0 ⋄ 0.7 0)×size)
+ &#39;fnd&#39;  ((0 1 ⋄ 0   0 ⋄ 0   0)×size)
+ &#39;lines&#39;((0 0 ⋄ 0.7 0 ⋄ 0.7 0)×size)
+ &#39;lnd&#39;  ((0 0 ⋄ 0   0 ⋄ 0   0)×size)]</pre></td><td>Ⓐ</td></tr></tbody>
+</table></figure>
+<p>The last of the above examples shows the use of an embedded computation — using multiplication and a reference to an external variable. Although this can be extremely useful within an application, systems can prohibit this when reading external source files, to avoid code injection attacks (in the same way that macros can be disabled when loading text documents and spreadsheets).</p>
+<h3 id='namespaces'>Namespaces</h3>
+<p>In the examples below, the traditional method of creating an object is marked Ⓧ for APLX and Ⓓ for Dyalog APL, while the proposed APL array notation is marked Ⓐ. In addition, the closest JavaScript equivalent is marked Ⓙ.</p>
+<figure><table>
+<thead>
+<tr><th colspan="2">Empty namespace</th></tr></thead>
+<tbody><tr><td><pre>∇z{}∇</pre></td><td>Ⓧ</td></tr><tr><td><pre>⎕NS⍬</pre></td><td>Ⓓ</td></tr><tr><td><pre>()</pre></td><td>Ⓐ</td></tr><tr><td><pre>{}</pre></td><td>Ⓙ</td></tr></tbody>
+</table></figure>
+<figure><table>
+<thead>
+<tr><th colspan="2">Vector of namespaces</th></tr></thead>
+<tbody><tr><td><pre>⍎¨⎕FX¨(&#39;a{&#39; &#39;}&#39;)(&#39;b{&#39; &#39;}&#39;)(&#39;c{&#39; &#39;}&#39;)</pre></td><td>Ⓧ</td></tr><tr><td><pre>⎕NS¨⍬⍬⍬</pre></td><td>Ⓓ</td></tr><tr><td><pre>()()()</pre> or <pre>(() ⋄ () ⋄ ())</pre></td><td>Ⓐ</td></tr><tr><td><pre>[{},{},{}]</pre></td><td>Ⓙ</td></tr></tbody>
+</table></figure>
+<figure><table>
+<thead>
+<tr><th colspan="2">Namespace with character vector member</th></tr></thead>
+<tbody><tr><td><pre>∇z{
+    x←&#39;hello&#39;
+}</pre></td><td>Ⓧ</td></tr><tr><td><pre>z←⎕NS⍬
+z.x←&#39;hello&#39;</pre></td><td>Ⓓ</td></tr><tr><td><pre>(x:&#39;hello&#39;)</pre></td><td>Ⓐ</td></tr><tr><td><pre>{x:'hello'}</pre></td><td>Ⓙ</td></tr></tbody>
+</table></figure>
+<figure><table>
+<thead>
+<tr><th colspan="2">Namespace with character matrix member</th></tr></thead>
+<tbody><tr><td><pre>∇z{
+    x←⊃&#39;hello&#39; &#39;world&#39;
+}</pre></td><td>Ⓧ</td></tr><tr><td><pre>z←⎕NS⍬
+z.x←⍉⍪&#39;hello&#39;
+z.x⍪← &#39;world&#39;</pre></td><td>Ⓓ</td></tr><tr><td><pre>(x:[&#39;hello&#39;
+    &#39;world&#39;])</pre></td><td>Ⓐ</td></tr><tr><td><pre>
+{x:['hello',
+    'world']}</pre></td><td>Ⓙ</td></tr></tbody>
+</table></figure>
+<figure><table>
+<thead>
+<tr><th colspan="2">Nested namespace structure with matrix member</th></tr></thead>
+<tbody><tr><td><pre>∇a{
+    x←⊃'hello' 'world'
+}
+∇b{
+    y
+}
+z←⎕NEW b
+z.y←a</pre></td><td>Ⓧ</td></tr><tr><td><pre>z←⎕NS⍬
+z.y←⎕NS⍬
+z.y.x←⍉⍪&#39;hello&#39;
+z.y.x⍪← &#39;world&#39;</pre></td><td>Ⓓ</td></tr><tr><td><pre>(y:(x:[&#39;hello&#39;
+       &#39;world&#39;]))</pre></td><td>Ⓐ</td></tr><tr><td><pre>
+{y:{x:['hello',
+       'world']}}</pre></td><td>Ⓙ</td></tr></tbody>
+</table></figure>
+<figure><table>
+<thead>
+<tr><th colspan="2">Namespace with multiple members</th></tr></thead>
+<tbody><tr><td><pre>∇z{
+    FirstName←&#39;Wolfgang&#39;
+    LastName←&#39;Mozart&#39;
+    Age←35
+}</pre></td><td>Ⓧ</td></tr>
+<tr><td><pre>z←⎕NS⍬
+z.FirstName←&#39;Wolfgang&#39;
+z.LastName←&#39;Mozart&#39;
+z.Age←35</pre></td><td>Ⓓ</td></tr>
+<tr><td><pre>(
+    FirstName:&#39;Wolfgang&#39;
+    LastName:&#39;Mozart&#39;
+    Age:35
+)</pre></td><td>Ⓐ</td></tr>
+<tr><td><pre>{
+    FirstName:'Wolfgang',
+    LastName:'Mozart',
+    Age:35
+}</pre></td><td>Ⓙ</td>
+</tr></tbody>
+</table></figure>
+<h2 id='technical-specification' class="b">Technical specification</h2>
+<p>The notation consists of syntax that was invalid in every mainstream APL implementation before its introduction, thus causing no issues for backwards compatibility. The added syntax consists of these constructs that are currently SYNTAX ERRORs:</p>
+<ul>
+<li><em>broken</em> round parentheses/parenthesised <em>name–value pair</em>: <code>(</code>…<code>)</code></li>
+<li><em>broken</em> square brackets: <code>[</code>…<code>]</code></li>
+<li>empty round parentheses: <code>()</code></li>
+</ul>
+<p>where <em>broken</em> means interrupted by one or more statement separators (diamonds <code>⋄</code> or line breaks).</p>
+<ul>
+<li>A statement here means a value expression, optionally separated with a colon <span>(<code>:</code>) from a preceding valid APL identifier.</span>
+<li>Empty statements make parentheses and brackets <em>broken</em>, but do not otherwise influence the result.</li>
+<li>A <em>broken</em> round parenthesis creates a namespace if every<sup><a id="r0" href="#n0">*</a></sup> separated statement is a <em>name–value pair</em>; every such pair defines a member of the resulting namespace.</li>
+<li>A parenthesised <em>name–value pair</em> creates a namespace; the pair defines the sole<a id="r1" href="#n1">†</a> member of the resulting namespace.</li>
+<li>A <em>broken</em> round parenthesis creates a vector if every<sup><a href="#n0">*</a></sup> separated statement is a value expression; every such statement forms an element in the resulting vector.</li>
+<li>A <em>broken</em> square bracket creates an array where every separated statement forms a major cell in the resulting array (equivalent to <a href="https://apl.wiki/Mix">Mix</a> applied to a vector of these), with scalars interpreted as one-element vectors.<sup><a id="r2" href="#n2">‡</a></sup></li>
+<li>An empty round parentheses creates a new namespace — equivalent to Dyalog APL’s <code>(⎕NS 0⍴⊂&#39;&#39;)</code> or shorthand <code>(⎕NS⍬)</code>.</li>
+<li>A <em>name–value pair</em> consists of a valid APL identifier, followed by a colon <span>(<code>:</code>)</span> and a value expression<sup><a id="r3" href="#n3">§</a></sup>.</li>
+</ul>
+<p><sup><a id="n0" href="#r0">*</a></sup> A mixture of name–value pairs and value expressions is an error.</p>
+<p><sup><a id="n1" href="#r1">†</a></sup> Besides for system values like <code>⎕IO</code>.</p>
+<p><sup><a id="n2" href="#r2">‡</a></sup> For reasons explained below under <a href="#minimum-rank-of-items-in-square-brackets">Minimum rank of items in square brackets</a>, it is proposed that a minimum rank of 1 is imposed on each cell within square brackets. At the time this document was written, the array notation in dzaima/APL did not implement this rule.</p>
+<p><sup><a id="n2" href="#r3">§</a></sup> See below under <a href="additional-content-types-in-namespaces">Additional content types in namespaces</a> for details on values that are not given as value expressions.</p>
+<p>Statement separators encapsulated in a direct function/dfn/lambda <code>{}</code> or further contained in array notation do not contribute to a parenthesis or bracket being considered <em>broken</em>. For example, in <code>({1=⍵:'y' ⋄ 'n'}?2)</code> the <code>⋄</code> belongs to the inner function/dfn/lambda curly braces, and therefore cannot affect the surrounding parenthesis.</p>
+<h3 id='formal-syntax'>Formal syntax</h3>
+<p>The array notation can be described using Extended Backus–Naur form, where an <code class="i">expression</code> is any traditional APL expression:</p>
+<pre class="i">
+value ::= expression | list | block | space
+list  ::= &#39;(&#39; ( ( value sep )+ value? | ( sep value )+ sep? ) &#39;)&#39;
+block ::= &#39;[&#39; ( ( value sep )+ value? | ( sep value )+ sep? ) &#39;]&#39;
+space ::= &#39;(&#39; sep? ( name &#39;:&#39; value ( sep name &#39;:&#39; value )* )? sep? &#39;)&#39;
+sep   ::= [⋄#x000A#x000D#x0085]+
+</pre>
+<p>The list of <code class="i">sep</code> values is for illustration purposes and is to match the line breaks recognised by the APL implementation. However, these three <code class="i">sep</code> values should be handled when reading Unicode text files.</p>
+<h3 id='syntax-diagram' class="b">Syntax diagram</h3>
+<p><img src="Array_notation_syntax.png" alt="Array notation syntax diagram"></p>
+<h2 id='minimum-rank-of-items-in-square-brackets' class="b">Minimum rank of items in square brackets</h2>
+<p>As noted above, the proposal suggests that each item within square brackets is coerced to a minimum rank of 1 before assembly of the complete array, while the existing implementation in dzaima/APL allows scalars. The argumentation is purely utilitarian: it is significantly easier to write single-column matrices if vectors are assumed. However, utility (or elegance) is an important design consideration for array notation. Allowing statements in square brackets to have rank 0 provides two ways to denote vectors using parentheses and square brackets.</p>
+<p>In the following examples, minimum rank of statements in square brackets is indicated as a circled number:</p>
+<figure><table>
+<thead>
+<tr><th colspan="2">Numeric vector</th></tr></thead>
+<tbody><tr><td><pre>
+[1
+ 2]</pre> or <pre>
+(1
+ 2)</pre></td><td>⓪</td></tr><tr><td><pre>
+(1
+ 2)</pre></td><td>①</td></tr></tbody>
+</table></figure>
+<figure><table>
+<thead>
+<tr><th colspan="2">Numeric column matrix</th></tr></thead>
+<tbody><tr><td><pre>
+[[1 ⋄ ]
+ [2 ⋄ ]]</pre> or <pre>
+[(1 ⋄ )
+ (2 ⋄ )]</pre></td><td>⓪</td></tr><tr><td><pre>
+[1
+ 2]</pre></td><td>①</td></tr></tbody>
+</table></figure>
+<figure><table>
+<thead>
+<tr><th colspan="2">Vector of character vectors</th></tr></thead>
+<tbody><tr><td><pre>
+[⊂&#39;hello&#39;
+ ⊂&#39;world&#39;]</pre> or <pre>
+(&#39;hello&#39;
+ &#39;world&#39;)</pre></td><td>⓪</td></tr><tr><td><pre>
+(&#39;hello&#39;
+ &#39;world&#39;)</pre></td><td>①</td></tr></tbody>
+</table></figure>
+<figure><table>
+<thead>
+<tr><th colspan="2">Column matrix of character vectors</th></tr></thead>
+<tbody><tr><td><pre>
+[(&#39;hello&#39; ⋄ )
+ (&#39;world&#39; ⋄ )]</pre></td><td>⓪</td></tr><tr><td><pre>
+[&#39;hello&#39;
+ &#39;world&#39;]</pre></td><td>①</td></tr></tbody>
+</table></figure>
+<h2 id='scoping-in-literal-namespaces'>Scoping in literal namespaces</h2>
+<p>The authors expect the literal notation for namespaces to become widely used at runtime. Contrast this with the notation for nested or high rank arrays, which we envision mainly as a mechanism for representing arrays that are part of an application or used during its initialisation.</p>
+<p>For use within an application at runtime, the ability to define values in literal namespaces in terms of already existing names is extremely valuable. Since the namespace is in the process of being created, it will rarely be useful to reference other namespace members. Furthermore, a namespace should be considered unordered, as opposed to Dyalog's existing <code>:Namespace</code> … <code>:EndNamespace</code> notation. The latter is often called a <em>script</em> and is executed in order, just like the script for a theatric play. It is proposed that value expressions should be interpreted as if they were running in the surrounding scope. However, one might want to use temporary variables in the creation of such values, and these should not leak out into the surrounding scope.</p>
+<p>Therefore, the proposal is that value expressions are evaluated much as expressions in Dyalog dfns; the surrounding scope is visible, but new names that are created become local to the expression, and are not shared between individual value expressions in the same namespace declaration:
+</p>
+<pre>
+      long←&#39;bobby&#39;
+      short←&#39;jack&#39;
+      ns←(short:&#39;jill&#39; ⋄ inner:short∘.=short←3↑long)
+      ns.inner
+1 0 1
+0 1 0
+1 0 1
+      short     ⍝ unaffected by inner assignment
+jack
+      ns.short  ⍝ ditto
+jill
+</pre>
+<h2 id='additional-content-types-in-namespaces'>Additional content types in namespaces</h2>
+An APL implementation can support code (that is, functions and operators, of various types, and scripted objects, for example <code>:Class</code> definitions) as members of namespaces. If such exists, the array notation for namespaces can accommodate it. Direct functions/dfns/lambdas and derived/tacit/point-free functions can be included as member values without additional effor after the <code>:</code> name–value separator, just as they are currently used as values in assignment. Scripted definitons can also be allowed after the <code>:</code> even though they do not otherwise return a result, and traditional defined functions ("tradfns") can be included surrounded by dels <code>∇</code> as they often are in function listings:</p>
+<pre>
+      ns←{
+          42∊⍵:100
+          (
+              dfn:{(+⌿⍵)÷≢⍵}
+              tacit:+⌿÷≢
+              obj: :Namespace
+                       val←4
+                   :EndNamespace
+              tradfn: ∇ (y y)←tradfn y
+                      ∇
+              recursive: ∇ 42
+          )
+      } 10
+      ns.tradfn ns.recursive
+100 100
+</pre>
+<p>Note that it is the final <code>∇</code> that disambiguates a function definition from a recursive call, as a value can be computed by a recursive call to the surrounding dfn:</p>
+<pre>
+      ∇ (y y)←tradfn y
+      ∇
+      y←42
+      ns←{
+          42∊⍵:100
+          (
+              recursive: ∇(y y)←tradfn y
+          )
+      } 10
+      ns.recursive
+100
+</pre>
+<p>The apparent double naming in <code>tradfn: ∇ (y y)←tradfn y</code> is necessary because a namespace can have a named reference to a function of a different name. Compare the following code which has worked in Dyalog APL for many years:</p>
+<pre>
+      ∇ (y y)←tradfn y
+      ∇
+      ns←⎕NS⍬
+      ns.rename←tradfn
+      ⎕EX'tradfn'
+      ns.rename 100
+100 100
+      ⎕CR'ns.rename'
+ (y y)←tradfn y
+</pre>
+<p>Syntactically, this would make it easy to populate a namespace with a reference to a niladic function:</p>
+<pre>
+      ns←(
+          nilad:∇ r←nilad
+                  r←42
+                ∇
+      )
+</pre>
+<p>While it is possible to create such a namespace using current Dyalog APL notation, it requires rather involved code.</p>
+<h2 id='additional-considerations'>Additional considerations</h2>
+<ul>
+<li>It would be possible to allow a shorter form when including a tradfn in a namespace under its own name. This could be done by omitting the <code>name:</code> label, making the following two namespaces equivalent:
+<table>
+<tr>
+<td><pre>
+(
+    tradfn:∇(y y)←tradfn y
+           ∇
+)
+</pre></td>
+<td>&emsp;&hArr;&emsp;</td>
+<td><pre>
+(
+    ∇(y y)←tradfn y
+    ∇
+)
+</pre></td></tr>
+</table>
+</li>
+<li>The final decisions on the minimum cell rank within square brackets and the scope of value expressions are still considered open.</li>
+</ul>
+<p>A number of other design questions that have been answered in the process of reaching this proposal are preserved on <a href='https://aplwiki.com/wiki/Array_notation_design_considerations#Specific_considerations'>APL Wiki</a>.</p>
+<h2 id='closing-remarks'>Closing remarks</h2>
+<p>Several people have contributed significant amounts of time to the evolution of an array notation worthy of inclusion as a core component in future APL, adding value to APL notation as a tool of thought. For details, see <a href='https://aplwiki.com/wiki/Array_notation#History'>APL Wiki</a>. We sincerely hope that you will give this proposal your attention and provide feedback.</p>
+</body>
+</html>
