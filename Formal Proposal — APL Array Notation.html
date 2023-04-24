@@ -17,7 +17,7 @@ span{white-space:nowrap}
 @media print{
   h1,h2,h3{break-after:avoid}
   table{break-inside:avoid}
-  .b{ page-break-before:always}
+  .b{break-after:avoid;break-before:page}
   sup>a{text-decoration:none;color:inherit}
   img{max-height:95vh}
 }
@@ -25,25 +25,25 @@ span{white-space:nowrap}
 </head>
 <body lang="en"><h1 id='formal-proposal-apl-array-notation'>Formal Proposal:<br>APL Array Notation</h1>
 <p>One of the defining features of the APL language is the ability to denote numeric vectors directly through juxtaposition — separating the elements by spaces, as in <code>0 1 1 2 3 5 8</code>. The notation for character “vectors” is similar to that for “strings” in most other languages, using quotes to denote the start and end of a list of characters. When generalised arrays were added to the language in the early 1980s, the most popular APL dialects extended the vector notation to allow nested arrays to be written using so-called <em>strand notation</em>, allowing the juxtaposition of sub-expressions producing arrays to form a one-dimensional array — as in <code>(2+2) (FOO 42) MAT</code></p>
-<p>Strand notation works well for small, relatively simple one-dimensional arrays. As soon as arrays are too large to be represented on a single line of code, deeply nested, rank greater than one, or (in APL systems that support them) contain namespaces or objects, APL requires the use of primitives or system functions to assemble them from simple components. </p>
+<p>Strand notation works well for small, relatively simple one-dimensional arrays. As soon as arrays are too large to be represented on a single line of code, deeply nested, rank greater than one, or (in APL systems that support them) contain name&shy;spaces or objects, APL requires the use of primitives or system functions to assemble them from simple components. </p>
 <p>The flexibility of the APL language has allowed many APL programmers to work around the issue, either by implementing custom array notations or by using the ability of most APL interpreters to simply store arrays within saved workspaces without having an actual source form of the data. Within specific applications, domain specific notations can be very successful, but readability is poor for anyone not trained in the specific variation used — or who is missing the tooling required to interpret them — as well as sometimes having significant run-time cost.</p>
 <p>Recently, the need for a better notation for arrays has grown within the Dyalog APL community:</p>
 <ul>
 <li>The switch to text-based sources means that arrays that represent constants, enumerations or initial values — that arguably constitute part of the source of an application — need a textual representation if they are to be managed using the same tools as functions and operators.</li>
-<li>The increased use of namespaces and name/value pairs as arguments to both user-defined and system functions makes the lack of a good notation for namespaces painful.</li>
+<li>The increased use of name&shy;spaces and name/value pairs as arguments to both user-defined and system functions makes the lack of a good notation for name&shy;spaces painful.</li>
 </ul>
-<p>Dyalog Ltd intends to implement core language support for a notation that makes it possible to write most arrays literally, without requiring the use of primitive functions, over multiple lines of source where this increases readability. It can be used to write nested arrays, and arrays of rank greater than one. The notation also describes many namespaces/objects, providing both inline and anonymous definitions.</p>
-<p>Array notations similar to that proposed here are currently supported in some newer implementations such as dzaima/APL and the APL-derivative BQN. Experimental implementations using APL models are available within some tools in the Dyalog eco-system, such as the Link tool which supports the representation of code and data in Unicode text files and the functions <code>Serialise</code> and <code>Deserialise</code> within the namespace <code>⎕SE.Dyalog.Array</code>. You can also try it out in <a href="https://abrudz.github.io/aplan/">the interactive online sandbox</a>.</p>
+<p>Dyalog Ltd intends to implement core language support for a notation that makes it possible to write most arrays literally, without requiring the use of primitive functions, over multiple lines of source where this increases readability. It can be used to write nested arrays, and arrays of rank greater than one. The notation also describes many name&shy;spaces/objects, providing both inline and anonymous definitions.</p>
+<p>Array notations similar to that proposed here are currently supported in some newer implementations such as dzaima/APL and the APL-derivative BQN. Experimental implementations using APL models are available within some tools in the Dyalog eco-system, such as the Link tool which supports the representation of code and data in Unicode text files and the functions <code>Serialise</code> and <code>Deserialise</code> within the name&shy;space <code>⎕SE.Dyalog.Array</code>. You can also try it out in <a href="https://abrudz.github.io/aplan/">the interactive online sandbox</a>.</p>
 <h2 id='providing-feedback'>Providing feedback</h2>
 <p>Dyalog is keen to have feedback from the array language community on the notation proposed here so that we can feel confident about the design, before we proceed with our implementation. Our hope is that we will be able to keep the differences between future array notations within the family of array languages to a minimum.</p>
 <p>We will monitor the APL Orchard chatroom, the APL Farm's #apl channel, the r/apl and r/apljk subreddits, and the comp.lang.apl newsgroup for feedback. (See <a href="https://aplwiki.com/wiki/Chat_rooms_and_forums">APL Wiki</a> for information about these forums.) In addition, we have created <a href="https://forums.dyalog.com/viewtopic.php?f=13&t=1871">a topic in our own forum</a>. If you prefer not to comment in public, please send comments <a href="mailto:arraynotation@dyalog.com">by e-mail</a>. Dyalog will update <a href="https://aplwiki.com/wiki/Talk:Array_notation_design_considerations">the discussion page</a> for APL Wiki's Array notation design considerations article to contain a record of significant feedback.</p>
 <h2 id="overview">Overview</h2>
-<p>The fundamental mechanism underlying the proposed notation is to group multiple lines, or statements separated by the traditional APL statement separator (diamond <code>⋄</code>), within parentheses and square brackets. Statements within parentheses <code>()</code> represent vectors — roughly equivalent to stranding — while statements within square brackets <code>[]</code> represent higher rank arrays, where the vector is subjected to a <a href="https://apl.wiki/Mix">Mix</a>. The notation also supports namespaces or dictionaries, where zero or more statements in the form <code>name:value</code> are collected within parentheses <code>()</code>.</p>
+<p>The fundamental mechanism underlying the proposed notation is to group multiple lines, or statements separated by the traditional APL statement separator (diamond <code>⋄</code>), within parentheses and square brackets. Statements within parentheses <code>()</code> represent vectors — roughly equivalent to stranding — while statements within square brackets <code>[]</code> represent higher rank arrays, where the vector is subjected to a <a href="https://apl.wiki/Mix">Mix</a>. The notation also supports name&shy;spaces or dictionaries, where zero or more statements in the form <code>name:value</code> are collected within parentheses <code>()</code>.</p>
 <h2 id='examples'>Examples</h2>
 <p>A very common technique used for array construction in APL is repeated concatenation resulting in the desired value being held in a variable (<code>z</code> in the below examples). Array notation should make it possible to express the complete array directly. In addition, the traditional technique sometimes involves the creation of helper variables as a side effect.</p>
 <p>Note that for all Dyalog APL examples, monadic <code>⊃</code> is <a href="https://apl.wiki/Mix">Mix</a> (that is, using <code>⎕ML←3</code>) for readability outside the Dyalog community.</p>
 <p>In the examples below, the traditional method of creating an array is marked Ⓣ, the proposed APL array notation is marked Ⓐ, and the minimal-style boxed display output (as provided by <code>]disp</code> and <a href="https://dfns.dyalog.com/n_disp.htm"><code>disp</code> from the dfns workspace</a>) is marked Ⓑ.</p>
-<h3 id='basic-arrays'>Basic arrays</h3>
+<h3 id='basic-arrays' class="b">Basic arrays</h3>
 <figure><table>
 <thead>
 <tr><th colspan="2">Vector of numeric vectors on a single line</th></tr></thead>
@@ -313,19 +313,19 @@ z.Age←35</pre></td><td>Ⓓ</td></tr>
 <ul>
 <li>A statement here means a value expression, optionally separated with a colon <span>(<code>:</code>) from a preceding valid APL identifier.</span>
 <li>Empty statements make parentheses and brackets <em>broken</em>, but do not otherwise influence the result.</li>
-<li>A <em>broken</em> round parenthesis creates a namespace if every<sup><a id="r0" href="#n0">*</a></sup> separated statement is a <em>name–value pair</em>; every such pair defines a member of the resulting namespace.</li>
-<li>A parenthesised <em>name–value pair</em> creates a namespace; the pair defines the sole<a id="r1" href="#n1">†</a> member of the resulting namespace.</li>
+<li>A <em>broken</em> round parenthesis creates a name&shy;space if every<sup><a id="r0" href="#n0">*</a></sup> separated statement is a <em>name–value pair</em>; every such pair defines a member of the resulting name&shy;space.</li>
+<li>A parenthesised <em>name–value pair</em> creates a name&shy;space; the pair defines the sole<a id="r1" href="#n1">†</a> member of the resulting name&shy;space.</li>
 <li>A <em>broken</em> round parenthesis creates a vector if every<sup><a href="#n0">*</a></sup> separated statement is a value expression; every such statement forms an element in the resulting vector.</li>
 <li>A <em>broken</em> square bracket creates an array where every separated statement forms a major cell in the resulting array (equivalent to <a href="https://apl.wiki/Mix">Mix</a> applied to a vector of these), with scalars interpreted as one-element vectors.<sup><a id="r2" href="#n2">‡</a></sup></li>
-<li>An empty round parentheses creates a new namespace — equivalent to Dyalog APL’s <code>(⎕NS 0⍴⊂&#39;&#39;)</code> or shorthand <code>(⎕NS⍬)</code>.</li>
+<li>An empty round parentheses creates a new name&shy;space — equivalent to Dyalog APL’s <code>(⎕NS 0⍴⊂&#39;&#39;)</code> or shorthand <code>(⎕NS⍬)</code>.</li>
 <li>A <em>name–value pair</em> consists of a valid APL identifier, followed by a colon <span>(<code>:</code>)</span> and a value expression<sup><a id="r3" href="#n3">§</a></sup>.</li>
 </ul>
 <p><sup><a id="n0" href="#r0">*</a></sup> A mixture of name–value pairs and value expressions is an error.</p>
 <p><sup><a id="n1" href="#r1">†</a></sup> Besides for system values like <code>⎕IO</code>.</p>
 <p><sup><a id="n2" href="#r2">‡</a></sup> For reasons explained below under <a href="#minimum-rank-of-items-in-square-brackets">Minimum rank of items in square brackets</a>, it is proposed that a minimum rank of 1 is imposed on each cell within square brackets. At the time this document was written, the array notation in dzaima/APL did not implement this rule.</p>
-<p><sup><a id="n2" href="#r3">§</a></sup> See below under <a href="additional-content-types-in-namespaces">Additional content types in namespaces</a> for details on values that are not given as value expressions.</p>
+<p><sup><a id="n2" href="#r3">§</a></sup> See below under <a href="additional-content-types-in-namespaces">Additional content types in name&shy;spaces</a> for details on values that are not given as value expressions.</p>
 <p>Statement separators encapsulated in a direct function/dfn/lambda <code>{}</code> or further contained in array notation do not contribute to a parenthesis or bracket being considered <em>broken</em>. For example, in <code>({1=⍵:'y' ⋄ 'n'}?2)</code> the <code>⋄</code> belongs to the inner function/dfn/lambda curly braces, and therefore cannot affect the surrounding parenthesis.</p>
-<h3 id='formal-syntax'>Formal syntax</h3>
+<h3 id='formal-syntax' class="b">Formal syntax</h3>
 <p>The array notation can be described using Extended Backus–Naur form, where an <code class="i">expression</code> is any traditional APL expression:</p>
 <pre class="i">
 value ::= expression | list | block | space
@@ -339,28 +339,40 @@ sep   ::= [⋄#x000A#x000D#x0085]+
 <p><img src="Array_notation_syntax.png" alt="Array notation syntax diagram"></p>
 <h2 id='minimum-rank-of-items-in-square-brackets' class="b">Minimum rank of items in square brackets</h2>
 <p>As noted above, the proposal suggests that each item within square brackets is coerced to a minimum rank of 1 before assembly of the complete array, while the existing implementation in dzaima/APL allows scalars. The argumentation is purely utilitarian: it is significantly easier to write single-column matrices if vectors are assumed. However, utility (or elegance) is an important design consideration for array notation. Allowing statements in square brackets to have rank 0 provides two ways to denote vectors using parentheses and square brackets.</p>
-<p>In the following examples, minimum rank of statements in square brackets is indicated as a circled number:</p>
+<p>In the following examples, minimum rank of statements in square brackets is indicated as a circled number, with the traditional method of creating an array marked Ⓣ:</p>
 <figure><table>
 <thead>
 <tr><th colspan="2">Numeric vector</th></tr></thead>
-<tbody><tr><td><pre>
+<tbody>
+<tr><td><pre>
 [1
  2]</pre> or <pre>
 (1
- 2)</pre></td><td>⓪</td></tr><tr><td><pre>
+ 2)</pre></td><td>⓪</td></tr>
+<tr><td><pre>
 (1
- 2)</pre></td><td>①</td></tr></tbody>
+ 2)</pre></td><td>①</td></tr>
+<tr><td><pre>
+z←,1
+z,←2</pre></td><td>Ⓣ</td></tr>
+</tbody>
 </table></figure>
 <figure><table>
 <thead>
 <tr><th colspan="2">Numeric column matrix</th></tr></thead>
-<tbody><tr><td><pre>
+<tbody>
+<tr><td><pre>
 [[1 ⋄ ]
  [2 ⋄ ]]</pre> or <pre>
 [(1 ⋄ )
- (2 ⋄ )]</pre></td><td>⓪</td></tr><tr><td><pre>
+ (2 ⋄ )]</pre></td><td>⓪</td></tr>
+<tr><td><pre>
 [1
- 2]</pre></td><td>①</td></tr></tbody>
+ 2]</pre></td><td>①</td></tr>
+<tr><td><pre>
+z←⍪1
+z⍪←2</pre></td><td>Ⓣ</td></tr>
+</tbody>
 </table></figure>
 <figure><table>
 <thead>
@@ -369,23 +381,34 @@ sep   ::= [⋄#x000A#x000D#x0085]+
 [⊂&#39;hello&#39;
  ⊂&#39;world&#39;]</pre> or <pre>
 (&#39;hello&#39;
- &#39;world&#39;)</pre></td><td>⓪</td></tr><tr><td><pre>
+ &#39;world&#39;)</pre></td><td>⓪</td></tr>
+<tr><td><pre>
 (&#39;hello&#39;
- &#39;world&#39;)</pre></td><td>①</td></tr></tbody>
+ &#39;world&#39;)</pre></td><td>①</td></tr>
+<tr><td><pre>
+z←,⊂&#39;hello&#39;
+z,←⊂&#39;world&#39;</pre></td><td>Ⓣ</td></tr>
+ </tbody>
 </table></figure>
 <figure><table>
 <thead>
 <tr><th colspan="2">Column matrix of character vectors</th></tr></thead>
-<tbody><tr><td><pre>
+<tbody>
+<tr><td><pre>
 [(&#39;hello&#39; ⋄ )
- (&#39;world&#39; ⋄ )]</pre></td><td>⓪</td></tr><tr><td><pre>
+ (&#39;world&#39; ⋄ )]</pre></td><td>⓪</td></tr>
+<tr><td><pre>
 [&#39;hello&#39;
- &#39;world&#39;]</pre></td><td>①</td></tr></tbody>
+ &#39;world&#39;]</pre></td><td>①</td></tr>
+<tr><td><pre>
+z←⍉⍪&#39;hello&#39;
+z⍪← &#39;world&#39;]</pre></td><td>Ⓣ</td></tr>
+</tbody>
 </table></figure>
 <h2 id='scoping-in-literal-namespaces'>Scoping in literal namespaces</h2>
-<p>The authors expect the literal notation for namespaces to become widely used at runtime. Contrast this with the notation for nested or high rank arrays, which we envision mainly as a mechanism for representing arrays that are part of an application or used during its initialisation.</p>
-<p>For use within an application at runtime, the ability to define values in literal namespaces in terms of already existing names is extremely valuable. Since the namespace is in the process of being created, it will rarely be useful to reference other namespace members. Furthermore, a namespace should be considered unordered, as opposed to Dyalog's existing <code>:Namespace</code> … <code>:EndNamespace</code> notation. The latter is often called a <em>script</em> and is executed in order, just like the script for a theatric play. It is proposed that value expressions should be interpreted as if they were running in the surrounding scope. However, one might want to use temporary variables in the creation of such values, and these should not leak out into the surrounding scope.</p>
-<p>Therefore, the proposal is that value expressions are evaluated much as expressions in Dyalog dfns; the surrounding scope is visible, but new names that are created become local to the expression, and are not shared between individual value expressions in the same namespace declaration:
+<p>The authors expect the literal notation for name&shy;spaces to become widely used at runtime. Contrast this with the notation for nested or high rank arrays, which we envision mainly as a mechanism for representing arrays that are part of an application or used during its initialisation.</p>
+<p>For use within an application at runtime, the ability to define values in literal name&shy;spaces in terms of already existing names is extremely valuable. Since the name&shy;space is in the process of being created, it will rarely be useful to reference other name&shy;space members. Furthermore, a name&shy;space should be considered unordered, as opposed to Dyalog's existing <code>:namespace</code> … <code>:Endnamespace</code> notation. The latter is often called a <em>script</em> and is executed in order, just like the script for a theatric play. It is proposed that value expressions should be interpreted as if they were running in the surrounding scope. However, one might want to use temporary variables in the creation of such values, and these should not leak out into the surrounding scope.</p>
+<p>Therefore, the proposal is that value expressions are evaluated much as expressions in Dyalog dfns; the surrounding scope is visible, but new names that are created become local to the expression, and are not shared between individual value expressions in the same name&shy;space declaration:
 </p>
 <pre>
       long←&#39;bobby&#39;
@@ -400,17 +423,17 @@ jack
       ns.short  ⍝ ditto
 jill
 </pre>
-<h2 id='additional-content-types-in-namespaces'>Additional content types in namespaces</h2>
-An APL implementation can support code (that is, functions and operators, of various types, and scripted objects, for example <code>:Class</code> definitions) as members of namespaces. If such exists, the array notation for namespaces can accommodate it. Direct functions/dfns/lambdas and derived/tacit/point-free functions can be included as member values without additional effor after the <code>:</code> name–value separator, just as they are currently used as values in assignment. Scripted definitons can also be allowed after the <code>:</code> even though they do not otherwise return a result, and traditional defined functions ("tradfns") can be included surrounded by dels <code>∇</code> as they often are in function listings:</p>
+<h2 id='additional-content-types-in-namespaces' class="b">Additional content types in namespaces</h2>
+An APL implementation can support code (that is, functions and operators, of various types, and scripted objects, for example <code>:Class</code> definitions) as members of name&shy;spaces. If such exists, the array notation for name&shy;spaces can accommodate it. Direct functions/dfns/lambdas and derived/tacit/point-free functions can be included as member values without additional effor after the <code>:</code> name–value separator, just as they are currently used as values in assignment. Scripted definitons can also be allowed after the <code>:</code> even though they do not otherwise return a result, and traditional defined functions ("tradfns") can be included surrounded by dels <code>∇</code> as they often are in function listings:</p>
 <pre>
       ns←{
           42∊⍵:100
           (
               dfn:{(+⌿⍵)÷≢⍵}
               tacit:+⌿÷≢
-              obj: :Namespace
+              obj: :namespace
                        val←4
-                   :EndNamespace
+                   :Endnamespace
               tradfn: ∇ (y y)←tradfn y
                       ∇
               recursive: ∇ 42
@@ -433,7 +456,7 @@ An APL implementation can support code (that is, functions and operators, of var
       ns.recursive
 100
 </pre>
-<p>The apparent double naming in <code>tradfn: ∇ (y y)←tradfn y</code> is necessary because a namespace can have a named reference to a function of a different name. Compare the following code which has worked in Dyalog APL for many years:</p>
+<p>The apparent double naming in <code>tradfn: ∇ (y y)←tradfn y</code> is necessary because a name&shy;space can have a named reference to a function of a different name. Compare the following code which has worked in Dyalog APL for many years:</p>
 <pre>
       ∇ (y y)←tradfn y
       ∇
@@ -445,7 +468,7 @@ An APL implementation can support code (that is, functions and operators, of var
       ⎕CR'ns.rename'
  (y y)←tradfn y
 </pre>
-<p>Syntactically, this would make it easy to populate a namespace with a reference to a niladic function:</p>
+<p>Syntactically, this would make it easy to populate a name&shy;space with a reference to a niladic function:</p>
 <pre>
       ns←(
           nilad:∇ r←nilad
@@ -453,10 +476,10 @@ An APL implementation can support code (that is, functions and operators, of var
                 ∇
       )
 </pre>
-<p>While it is possible to create such a namespace using current Dyalog APL notation, it requires rather involved code.</p>
+<p>While it is possible to create such a name&shy;space using current Dyalog APL notation, it requires rather involved code.</p>
 <h2 id='additional-considerations'>Additional considerations</h2>
 <ul>
-<li>It would be possible to allow a shorter form when including a tradfn in a namespace under its own name. This could be done by omitting the <code>name:</code> label, making the following two namespaces equivalent:
+<li>It would be possible to allow a shorter form when including a tradfn in a name&shy;space under its own name. This could be done by omitting the <code>name:</code> label, making the following two name&shy;spaces equivalent:
 <table>
 <tr>
 <td><pre>
