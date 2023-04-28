@@ -1,0 +1,48 @@
+ Ed←{
+     ⍺←⊃⎕RSI
+     1<≢⍴⍵:_←↑⍺ ∇↓⍵
+     1=≡,⍵:_←⊃⍺ ∇⊂⍵
+     names←,∘⍕¨⍵
+
+     nc←(40 ⍺.⎕ATX names)-0=≢¨names ⍝ handle ⍬ and workaround for [20505] 40⎕ATX'' gives 0 instead of ¯1
+     names/⍨←0≤nc
+     names←,¨names
+     0=≢names:''⍨¨names
+
+     new←names/⍨0=nc
+     _←⍺⍎'⋄⍬',⍨(×≢new)/(⍕new),'←⎕NS¨⊆','⍬'⍨¨new ⍝ undefined: ←()
+
+     Src←{
+         src←60 ⍺.⎕ATX ⍵
+         0≠≢src:src
+         ⎕SE.Dyalog.Array.Serialise ⍺⍎⍵
+     }
+
+     Edit←{
+         keep←⍵∊⍺.⎕ED⍠'EditName' 'Allow'⊢⍵ ⍝ if no changes, ⎕ED returns ''
+         keep⌊←⍺{≢' '~⍨∊⍺⍎⍵}¨⍵ ⍝ don't keep empty
+
+         Fix←{
+             0::0,⊂(⊃⎕DMX.DM),{(''≢⍵)/' ─ ',⍵}⎕DMX.Message
+             0=≢' '~⍨∊⍵:¯1 0
+             ':'=⊃' '~⍨⊃⍵/⍨~'⍝ '∊⍨⊃¨⍵~¨' ':1,0 ⍺.⎕FIX ⍵ ⍝ looks like script
+             1,⊂⍺ ⎕SE.Dyalog.Array.Deserialise ⍵
+         }
+
+         ok←⊃¨ok_val←keep(⍺{⍺:⍺⍺ Fix ⍵ ⋄ ¯1 0})¨⍺⍎¨⍵
+         ∧/|ok:ok_val
+
+         ⍝ Error: MsgBox and try again:
+         msg←'Can''t fix:' '',↓↑(~ok)/⍵{⍺,':    ',2⊃⍵}¨ok_val
+         _←3503⌶'APL Array Notation Editor'msg'Warn'
+         (⍺ ∇ ⍵/⍨0=ok)@{~ok}ok_val
+     }
+
+     old←⍺⍎¨names
+     _←names ⍺.{⍎⍺,'←⍵'}¨⍺ Src¨names ⍝ set value to src
+     (ok val)←↓⍉↑⍺ Edit names
+     val←(old/⍨0>ok)@{0>ok}val
+     _←⍵ ⍺.{⍬⊣⍎⍺,'←⍵'}¨val
+     1:_←names/⍨1=ok
+ }
+ 
