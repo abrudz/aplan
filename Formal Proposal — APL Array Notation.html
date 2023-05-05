@@ -13,6 +13,9 @@ code,pre{white-space:pre;background:#eee;margin:0;padding:0 .33ex;border-radius:
 img{max-width:100%}
 .i{font-family:Iosevka SS09}
 span{white-space:nowrap}
+del{color:#7004;text-decoration-color:#3004;text-decoration-thickness:0.1em}
+ins{text-decoration-color:#0704;text-decoration-thickness:0.1em}
+.e{border-left:0.2em solid #770;margin-left:-0.5em;padding-left:0.3em;border-top-left-radius:0;border-bottom-left-radius:0}
 
 @media print{
   h1,h2,h3{break-after:avoid}
@@ -24,6 +27,7 @@ span{white-space:nowrap}
 </style>
 </head>
 <body lang="en"><h1 id='formal-proposal-apl-array-notation'>Formal Proposal:<br>APL Array Notation</h1>
+<p class="e"><em><strong>Note:</strong> This proposal's specification for <a href='#scoping-in-literal-namespaces'>scoping in literal namespaces</a>  has been changed based on feedback received after its initial publication. Affected sections are marked by a vertical bar on the left, with removed text <del>struck through</del> and added text <ins>underlined</ins>.</em></p>
 <p>One of the defining features of the APL language is the ability to denote numeric vectors directly through juxtaposition — separating the elements by spaces, as in <code>0 1 1 2 3 5 8</code>. The notation for character “vectors” is similar to that for “strings” in most other languages, using quotes to denote the start and end of a list of characters. When generalised arrays were added to the language in the early 1980s, the most popular APL dialects extended the vector notation to allow nested arrays to be written using so-called <em>strand notation</em>, allowing the juxtaposition of sub-expressions producing arrays to form a one-dimensional array — as in <code>(2+2) (FOO 42) MAT</code></p>
 <p>Strand notation works well for small, relatively simple one-dimensional arrays. As soon as arrays are too large to be represented on a single line of code, deeply nested, rank greater than one, or (in APL systems that support them) contain name&shy;spaces or objects, APL requires the use of primitives or system functions to assemble them from simple components. </p>
 <p>The flexibility of the APL language has allowed many APL programmers to work around the issue, either by implementing custom array notations or by using the ability of most APL interpreters to simply store arrays within saved workspaces without having an actual source form of the data. Within specific applications, domain specific notations can be very successful, but readability is poor for anyone not trained in the specific variation used — or who is missing the tooling required to interpret them — as well as sometimes having significant run-time cost.</p>
@@ -407,10 +411,10 @@ z⍪← &#39;world&#39;]</pre></td><td>Ⓣ</td></tr>
 </table></figure>
 <h2 id='scoping-in-literal-namespaces'>Scoping in literal namespaces</h2>
 <p>The authors expect the literal notation for name&shy;spaces to become widely used at runtime. Contrast this with the notation for nested or high rank arrays, which we envision mainly as a mechanism for representing arrays that are part of an application or used during its initialisation.</p>
-<p>For use within an application at runtime, the ability to define values in literal name&shy;spaces in terms of already existing names is extremely valuable. Since the name&shy;space is in the process of being created, it will rarely be useful to reference other name&shy;space members. Furthermore, a name&shy;space should be considered unordered, as opposed to Dyalog's existing <code>:namespace</code> … <code>:Endnamespace</code> notation. The latter is often called a <em>script</em> and is executed in order, just like the script for a theatric play. It is proposed that value expressions should be interpreted as if they were running in the surrounding scope. However, one might want to use temporary variables in the creation of such values, and these should not leak out into the surrounding scope.</p>
-<p>Therefore, the proposal is that value expressions are evaluated much as expressions in Dyalog dfns; the surrounding scope is visible, but new names that are created become local to the expression, and are not shared between individual value expressions in the same name&shy;space declaration:
+<p class="e">For use within an application at runtime, the ability to define values in literal name&shy;spaces in terms of already existing names is extremely valuable. Since the name&shy;space is in the process of being created, it will rarely be useful to reference other name&shy;space members. Furthermore, a name&shy;space should be considered unordered, as opposed to Dyalog's existing <code>:namespace</code> … <code>:Endnamespace</code> notation. The latter is often called a <em>script</em> and is executed in order, just like the script for a theatric play. It is proposed that value expressions should be interpreted as if they were running in the surrounding scope. <del>However, one might want to use temporary variables in the creation of such values, and these should not leak out into the surrounding scope.</del></p>
+<p class="e"><del>Therefore, the proposal is that value expressions are evaluated much as expressions in Dyalog dfns; the surrounding scope is visible, but new names that are created become local to the expression, and are not shared between individual value expressions in the same name&shy;space declaration:</del> <ins>Any assignments done in a value expression will therefore persist in the surrounding scope:</ins>
 </p>
-<pre>
+<pre class="e">
       long←&#39;bobby&#39;
       short←&#39;jack&#39;
       ns←(short:&#39;jill&#39; ⋄ inner:short∘.=short←3↑long)
@@ -418,10 +422,14 @@ z⍪← &#39;world&#39;]</pre></td><td>Ⓣ</td></tr>
 1 0 1
 0 1 0
 1 0 1
-      short     ⍝ unaffected by inner assignment
+<del>      short     ⍝ unaffected by inner assignment
 jack
       ns.short  ⍝ ditto
-jill
+jill</del>
+<ins>      short     ⍝ altered by inner assignment
+bob
+      ns.short  ⍝ unaffected by inner assignment
+jill</ins>
 </pre>
 <h2 id='additional-content-types-in-namespaces' class="b">Additional content types in namespaces</h2>
 An APL implementation can support code (that is, functions and operators, of various types, and scripted objects, for example <code>:Class</code> definitions) as members of name&shy;spaces. If such exists, the array notation for name&shy;spaces can accommodate it. Direct functions/dfns/lambdas and derived/tacit/point-free functions can be included as member values without additional effor after the <code>:</code> name–value separator, just as they are currently used as values in assignment. Scripted definitons can also be allowed after the <code>:</code> even though they do not otherwise return a result, and traditional defined functions ("tradfns") can be included surrounded by dels <code>∇</code> as they often are in function listings:</p>
